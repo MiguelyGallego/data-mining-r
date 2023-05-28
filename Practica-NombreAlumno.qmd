@@ -253,7 +253,37 @@ Crearemos una función tal que le pasemos un apartamento con los siguientes dato
 y nos devuelva los 5 más similares de:
 
 ```{r}
+df_madrid_pca <- df_madrid[, c("Accommodates", "Bathrooms", "Bedrooms", "Beds", "Price",
+                                        "Guests.Included", "Extra.People", "Review.Scores.Rating",
+                                        "Latitude", "Longitude", "Square.Meters")]
+apartment <- df_madrid |>
+  slice(2) |>
+  select(Accommodates, Bathrooms, Bedrooms, Beds, Price, Guests.Included, Extra.People,
+         Review.Scores.Rating, Latitude, Longitude, Square.Meters)
+apartment
 
+#Utilizamos prcomp para calcular el pca
+pca<-prcomp(na.omit(df_madrid_pca), center = TRUE, scale = TRUE)
+#Comprobamos que los dos primeros autovalores contienen aproximadamente el 90% de la varianza
+plot(pca$sdev^2/sum(pca$sdev^2),main="Autovalores")
+
+#Nos quedamos con los primeros 3 compnetes principales porque cubren mas del 80% de la varianza.
+n_comp = 3
+
+pred <- predict(pca, newdata = apartment)
+pred <- matrix(pred[1:n_comp],nrow=1)
+pred
+
+Apc<-pca$x[,1:n_comp]
+dist<-rowSums((pred[rep(1, times = nrow(Apc)), ]-Apc)^2)    
+
+knn=5
+
+for (i in 1:nrow(Apc)){
+    dist[i]<-sum((pred-Apc[i,])^2)
+}
+
+knn_tags<-rownames(train_matrix)[order(dist,decreasing = F) %in% c(1:knn)]
 ```
 
 ------------------------------------------------------------------------
