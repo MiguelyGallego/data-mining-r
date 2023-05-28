@@ -205,6 +205,9 @@ ggplot(df_madrid.test, aes(x=Square.Meters, y=Square.Meters-pred ))+geom_point()
 15. Si tuvieramos un anuncio de un apartamento para 6 personas (Accommodates), con 1 baño, con un precio de 80€/noche y 3 habitaciones en el barrio de Sol, con 3 camas y un review de 80. ¿Cuantos metros cuadrados tendría? Si tu modelo necesita algúna variable adicional puedes inventartela dentro del rango de valores del dataset. ¿Como varía sus metros cuadrados con cada habitación adicional?
 
 ```{r}
+library(GGally)
+library(dplyr)
+
 new_data <- data.frame(
   Accommodates = 6,
   Bathrooms = 1,
@@ -214,6 +217,13 @@ new_data <- data.frame(
   Beds = 3,
   Review.Scores.Rating = 80
 )
+
+df_madrid <- df_madrid |>
+  mutate(Bathrooms = ifelse(is.na(Bathrooms), mean(Bathrooms, na.rm = TRUE), Bathrooms),
+         Bedrooms = ifelse(is.na(Bedrooms), mean(Bedrooms, na.rm = TRUE), Bedrooms),
+         Price = ifelse(is.na(Price), mean(Price, na.rm = TRUE), Price))
+
+
 predicted_square_meters <- predict(model, newdata = new_data)
 cat(paste0("Metros cuadrados estimados: ", round(predicted_square_meters, 2)))
 
@@ -226,17 +236,14 @@ cat(paste0(" ", " Efecto de una habitación adicional: ", round(bedrooms_coeffic
 16. Rellenar los Square.Meters con valor NA con el estimado con el modelo anterior.
 
 ```{r}
-# Obtener las filas con valores NA en Square.Meters
-na_rows <- is.na(df_madrid$Square.Meters)
-na_rows
-# Crear un dataframe con las variables predictoras de las filas NA
-predictors <- df_madrid[na_rows, -c(Square.Meters)]
 
-# Realizar la predicción de los metros cuadrados para las filas NA
-predicted_square_meters <- predict(model, newdata = predictors)
+sum(is.na(df_madrid$Square.Meters))
 
-# Rellenar los valores NA con los valores estimados
-df_madrid$Square.Meters[na_rows] <- predicted_square_meters
+df_na <- df_madrid[is.na(df_madrid$Square.Meters), ]
+df_na$Square.Meters <- predict(model, newdata = df_na)
+df_madrid[is.na(df_madrid$Square.Meters), ]$Square.Meters <- df_na$Square.Meters
+
+df_madrid[which(is.na(df_madrid$Square.Meters)),]
 ```
 
 ------------------------------------------------------------------------
