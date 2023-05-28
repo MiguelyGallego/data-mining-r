@@ -182,8 +182,6 @@ str(df_madrid.test)
 model <- lm(Square.Meters ~  Bathrooms+Bedrooms+Price, data = df_madrid.train)
 summary(model)
 
-#predictions <- predict(model, newdata = df_madrid.test)
-
 df_madrid.test$pred <- predict(model, df_madrid.test)
 df_complete <- na.omit(df_madrid.test[c("pred", "Square.Meters")])
 caret::postResample(df_complete$pred, df_complete$Square.Meters)
@@ -253,5 +251,9 @@ df_madrid[which(is.na(df_madrid$Square.Meters)),]
 Crearemos una función tal que le pasemos un apartamento con los siguientes datos: \* Accommodates \* Bathrooms \* Bedrooms \* Beds \* Price \* Guests.Included \* Extra.People \* Review.Scores.Rating \* Latitude \* Longitude \* Square.Meters
 
 y nos devuelva los 5 más similares de:
+
+```{r}
+
+```
 
 ------------------------------------------------------------------------
